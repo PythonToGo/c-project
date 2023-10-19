@@ -33,8 +33,9 @@ public:
     COURSE(std::string name, LECTURER* lecturer) : name(name), lecturer(lecturer) {}
     
     bool add_participant(STUDENT* student) {
-        for (STUDENT*& s : participants) {
-            if (s->email == student->email)
+        //for (STUDENT*& s : participants) {
+        for(std::vector<STUDENT*>::iterator it = participants.begin();it != participants.end(); ++it) {
+            if ((*it)->email == student->email)
                 return false;
         }
         if (participants.size() < 10)
@@ -81,26 +82,46 @@ void registerForCourse(std::vector<COURSE>& courses) {
     
 };
 
+void outputCourses(const std::vector<COURSE>& courses) {
+    for (size_t i=0; i< courses.size(); ++i) {
+        const COURSE& course = courses[i];
+        std::cout << "Course Name: " << course.name << std::endl;
+        std::cout << "Lecturer : " << course.lecturer->first_name << " " << course.lecturer->surname << std::endl; 
+
+        if(course.participants.size() < 3) {
+            std::cout << "Course will not take place." << std::endl;
+        } else {
+            std::cout << "Participants :" << std::endl;
+            for(size_t j=0; j <course.participants.size(); ++j) {
+                const STUDENT* student = course.participants[j];
+                std::cout << student->first_name << " " << student->surname << " - " << student->email << std::endl;
+            }
+        }
+    }
+    std::cout << "_____________" << std::endl;
+}
+
+
 int main() {
     // add some students here
     LECTURER* lecturer1 = new LECTURER("taehyoung", "kim", "taehyoung.kim@tum.de","M.Sc");
     LECTURER* lecturer2 = new LECTURER("andrew", "kim", "andrew.kim@tum.de","Prof.");
     LECTURER* lecturer3 = new LECTURER("sam", "kim", "sam.kim@tum.de","Dr.");
 
-    std::vector<COURSE> courses = {
-        COURSE("Programming", lecturer1),
-        COURSE("Databases", lecturer2),
-        COURSE("Software Engineering", lecturer3) 
-    };
+    std::vector<COURSE> courses;
+    courses.push_back(COURSE("Programming", lecturer1));
+    courses.push_back(COURSE("Databases", lecturer2));
+    courses.push_back(COURSE("Software Engineering", lecturer3));
 
-    for (COURSE& course : courses) {
-        for(STUDENT* student : course.participants) {
-            delete student;
+    for (std::vector<COURSE>::iterator it = courses.begin(); it != courses.end(); ++it) {
+        for(std::vector<STUDENT*>::iterator studentIt = it->participants.begin(); studentIt != it->participants.end(); ++studentIt) {
+            delete *studentIt;
         }
     }
 
     registerForCourse(courses);
-
+    outputCourses(courses);
+    
     delete lecturer1;
     delete lecturer2;
     delete lecturer3;
